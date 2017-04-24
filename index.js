@@ -47,9 +47,6 @@ function pickManifest (packument, wanted, opts) {
   }
 
   if (!target && wanted === '*') {
-    // npm hard-codes `latest` here, but it's likely intended
-    // to be `defaultTag`.
-    //
     // This specific corner is meant for the case where
     // someone is using `*` as a selector, but all versions
     // are pre-releases, which don't match ranges at all.

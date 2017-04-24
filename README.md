@@ -52,6 +52,7 @@ is, they're objects with the following shape (only fields used by
 
 ```javascript
 {
+  name: 'some-package',
   'dist-tags': {
     foo: '1.0.1'
   },

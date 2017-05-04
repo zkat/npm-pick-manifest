@@ -41,8 +41,10 @@ test('basic mathematical range selection', t => {
       '2.0.0': { version: '2.0.0' }
     }
   }
-  const manifest = pickManifest(metadata, '>=1.0.0 <2')
-  t.equal(manifest.version, '1.0.2', 'picked the right manifest using mathematical range')
+  const manifest1 = pickManifest(metadata, '>=1.0.0 <2')
+  t.equal(manifest1.version, '1.0.2', 'picked the right manifest using mathematical range')
+  const manifest2 = pickManifest(metadata, '=1.0.0')
+  t.equal(manifest2.version, '1.0.0', 'picked the right manifest using mathematical range')
   t.done()
 })
 

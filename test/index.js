@@ -192,3 +192,17 @@ test('errors if metadata has no versions', t => {
   }, {code: 'ENOVERSIONS'})
   t.done()
 })
+
+test('matches even if requested version has spaces', t => {
+  const metadata = {
+    versions: {
+      '1.0.0': { version: '1.0.0' },
+      '1.0.1': { version: '1.0.1' },
+      '1.0.2': { version: '1.0.2' },
+      '2.0.0': { version: '2.0.0' }
+    }
+  }
+  const manifest = pickManifest(metadata, '  1.0.0 ')
+  t.equal(manifest.version, '1.0.0', 'picked the right manifest even though `wanted` had spaced')
+  t.done()
+})

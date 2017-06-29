@@ -32,11 +32,11 @@
     "semver": "^5.3.0"
   },
   "devDependencies": {
-    "nyc": "^10.2.0",
+    "nyc": "^10.3.2",
     "standard": "^9.0.2",
-    "standard-version": "^4.0.0",
-    "tap": "^10.3.2",
-    "weallbehave": "^1.0.0",
+    "standard-version": "^4.2.0",
+    "tap": "^10.7.0",
+    "weallbehave": "^1.2.0",
     "weallcontribute": "^1.0.8"
   },
   "config": {

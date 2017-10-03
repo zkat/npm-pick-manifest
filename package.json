@@ -32,8 +32,8 @@
     "semver": "^5.4.1"
   },
   "devDependencies": {
-    "nyc": "^10.3.2",
-    "standard": "^9.0.2",
+    "nyc": "^11.2.1",
+    "standard": "^10.0.3",
     "standard-version": "^4.2.0",
     "tap": "^10.7.0",
     "weallbehave": "^1.2.0",

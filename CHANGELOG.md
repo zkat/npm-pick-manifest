@@ -2,6 +2,27 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="2.0.0"></a>
+# [2.0.0](https://github.com/zkat/npm-pick-manifest/compare/v1.0.4...v2.0.0) (2017-10-03)
+
+
+### Bug Fixes
+
+* **license:** relicense project according to npm policy (#3) ([ed743a0](https://github.com/zkat/npm-pick-manifest/commit/ed743a0))
+
+
+### Features
+
+* **selection:** Avoid matching deprecated packages if possible ([3fc6c3a](https://github.com/zkat/npm-pick-manifest/commit/3fc6c3a))
+
+
+### BREAKING CHANGES
+
+* **selection:** deprecated versions may be skipped now
+* **license:** This moves the license from CC0 to ISC and properly documents the copyright as belonging to npm, Inc.
+
+
+
 <a name="1.0.4"></a>
 ## [1.0.4](https://github.com/zkat/npm-pick-manifest/compare/v1.0.3...v1.0.4) (2017-06-29)
 

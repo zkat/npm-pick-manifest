@@ -28,7 +28,7 @@
   },
   "license": "ISC",
   "dependencies": {
-    "npm-package-arg": "^5.1.2",
+    "npm-package-arg": "^6.0.0",
     "semver": "^5.4.1"
   },
   "devDependencies": {

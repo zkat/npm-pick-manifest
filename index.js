@@ -46,7 +46,7 @@ function pickManifest (packument, wanted, opts) {
     target = tagVersion
   }
 
-  if (!target) {
+  if (!target && !opts.includeDeprecated) {
     target = semver.maxSatisfying(undeprecated, wanted, true)
   }
   if (!target) {

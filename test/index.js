@@ -250,3 +250,19 @@ test('matches deprecated versions if we have to', t => {
   t.equal(manifest.version, '1.1.0', 'picked the right manifest')
   t.done()
 })
+
+test('accepts opts.includeDeprecated option to disable skipping', t => {
+  const metadata = {
+    versions: {
+      '1.0.0': { version: '1.0.0' },
+      '1.0.1': { version: '1.0.1' },
+      '1.1.0': { version: '1.1.0', deprecated: 'yes' },
+      '2.0.0': { version: '2.0.0' }
+    }
+  }
+  const manifest = pickManifest(metadata, '^1.0.0', {
+    includeDeprecated: true
+  })
+  t.equal(manifest.version, '1.1.0', 'picked the right manifest')
+  t.done()
+})

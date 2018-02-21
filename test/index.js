@@ -97,6 +97,29 @@ test('errors if a non-registry spec is provided', t => {
   t.done()
 })
 
+test('includes available versions in ETARGET message', t => {
+  const metadata = {
+    'dist-tags': {
+      foo: '1.0.1',
+      latest: '1.0.0'
+    },
+    versions: {
+      '1.0.0': { version: '1.0.0' },
+      '1.0.1': { version: '1.0.1' },
+      '1.0.2': { version: '1.0.2', deprecated: 'yes' }
+    }
+  }
+  t.throws(() => {
+    pickManifest(metadata, '^2.0.0')
+  }, /\s{2}foo, latest, 1.0.0, 1.0.1$/)
+  t.throws(() => {
+    pickManifest(metadata, '^2.0.0', {
+      includeDeprecated: true
+    })
+  }, /\s{2}foo, latest, 1.0.0, 1.0.1, 1.0.2$/)
+  t.done()
+})
+
 test('skips any invalid version keys', t => {
   // Various third-party registries are prone to having trash as
   // keys. npm simply skips them. Yay robustness.

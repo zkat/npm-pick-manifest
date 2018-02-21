@@ -63,7 +63,12 @@ function pickManifest (packument, wanted, opts) {
   const manifest = target && packument.versions[target]
   if (!manifest) {
     err = new Error(
-      `No matching version found for ${packument.name}@${wanted}`
+      `No matching version found for ${packument.name}@${wanted}\n` +
+      `Valid install targets:\n  ${
+        Object.keys(distTags).concat(
+          !opts.includeDeprecated ? undeprecated : versions
+        ).join(', ')
+      }`
     )
     err.code = 'ETARGET'
     err.name = packument.name

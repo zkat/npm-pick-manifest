@@ -1,11 +1,17 @@
 'use strict'
 
+const figgyPudding = require('figgy-pudding')
 const npa = require('npm-package-arg')
 const semver = require('semver')
 
+const PickerOpts = figgyPudding({
+  defaultTag: { default: 'latest' },
+  includeDeprecated: { default: false }
+})
+
 module.exports = pickManifest
 function pickManifest (packument, wanted, opts) {
-  opts = opts || {}
+  opts = PickerOpts(opts)
   const spec = npa.resolve(packument.name, wanted)
   const type = spec.type
   if (type === 'version' || type === 'range') {
@@ -35,7 +41,7 @@ function pickManifest (packument, wanted, opts) {
     throw new Error('Only tag, version, and range are supported')
   }
 
-  const tagVersion = distTags[opts.defaultTag || 'latest']
+  const tagVersion = distTags[opts.defaultTag]
 
   if (
     !target &&

@@ -266,3 +266,28 @@ test('accepts opts.includeDeprecated option to disable skipping', t => {
   t.equal(manifest.version, '1.1.0', 'picked the right manifest')
   t.done()
 })
+
+test('accepts opts.enjoyBy option to do date-based cutoffs', t => {
+  const metadata = {
+    'dist-tags': {
+      latest: '3.0.0'
+    },
+    time: {
+      modified: '2018-01-03T00:00:00.000Z',
+      created: '2018-01-01T00:00:00.000Z',
+      '1.0.0': '2018-01-01T00:00:00.000Z',
+      '2.0.0': '2018-01-02T00:00:00.000Z',
+      '3.0.0': '2018-01-03T00:00:00.000Z'
+    },
+    versions: {
+      '1.0.0': { version: '1.0.0' },
+      '2.0.0': { version: '2.0.0' },
+      '3.0.0': { version: '3.0.0' }
+    }
+  }
+  const manifest = pickManifest(metadata, '*', {
+    enjoyBy: '2018-01-02'
+  })
+  t.equal(manifest.version, '2.0.0', 'filtered out 3.0.0 because of dates')
+  t.done()
+})

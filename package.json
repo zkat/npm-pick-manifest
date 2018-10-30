@@ -28,6 +28,7 @@
   },
   "license": "ISC",
   "dependencies": {
+    "figgy-pudding": "^3.5.1",
     "npm-package-arg": "^6.0.0",
     "semver": "^5.4.1"
   },

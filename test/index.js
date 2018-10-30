@@ -289,5 +289,15 @@ test('accepts opts.enjoyBy option to do date-based cutoffs', t => {
     enjoyBy: '2018-01-02'
   })
   t.equal(manifest.version, '2.0.0', 'filtered out 3.0.0 because of dates')
+  t.throws(() => {
+    pickManifest(metadata, '3.0.0', {
+      enjoyBy: '2018-01-02'
+    })
+  }, /Enjoy By date of/, 'trying to find by out-of-range version breaks')
+  t.throws(() => {
+    pickManifest(metadata, 'latest', {
+      enjoyBy: '2018-01-02'
+    })
+  }, /Enjoy By date of/, 'trying to find by tag breaks if date is out of range')
   t.done()
 })

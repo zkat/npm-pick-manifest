@@ -83,7 +83,13 @@ function pickManifest (packument, wanted, opts) {
   )
   if (!manifest) {
     err = new Error(
-      `No matching version found for ${packument.name}@${wanted}`
+      `No matching version found for ${packument.name}@${wanted}${
+        opts.enjoyBy
+          ? ` with an Enjoy By date of ${
+            new Date(opts.enjoyBy).toLocaleString()
+          }. Maybe try a different date?`
+          : ''
+      }`
     )
     err.code = 'ETARGET'
     err.name = packument.name

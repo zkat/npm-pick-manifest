@@ -21,14 +21,15 @@ function pickManifest (packument, wanted, opts) {
   }
   const distTags = packument['dist-tags'] || {}
   const versions = Object.keys(packument.versions || {}).filter(v => {
-    return semver.valid(v, true) && (
-      !time || (
-        packument.time[v] &&
-        time >= +(new Date(packument.time[v]))
-      )
-    )
+    return semver.valid(v, true)
   })
-  const undeprecated = versions.filter(v => !packument.versions[v].deprecated)
+
+  function enjoyableBy (v) {
+    return !time || (
+      packument.time[v] && time >= +(new Date(packument.time[v]))
+    )
+  }
+
   let err
 
   if (!versions.length) {
@@ -56,20 +57,23 @@ function pickManifest (packument, wanted, opts) {
     !target &&
     tagVersion &&
     packument.versions[tagVersion] &&
-    (!time || versions.indexOf(tagVersion) !== -1) &&
+    enjoyableBy(tagVersion) &&
     semver.satisfies(tagVersion, wanted, true)
   ) {
     target = tagVersion
   }
 
   if (!target && !opts.includeDeprecated) {
+    const undeprecated = versions.filter(v => !packument.versions[v].deprecated && enjoyableBy(v)
+    )
     target = semver.maxSatisfying(undeprecated, wanted, true)
   }
   if (!target) {
-    target = semver.maxSatisfying(versions, wanted, true)
+    const stillFresh = versions.filter(enjoyableBy)
+    target = semver.maxSatisfying(stillFresh, wanted, true)
   }
 
-  if (!target && wanted === '*') {
+  if (!target && wanted === '*' && enjoyableBy(tagVersion)) {
     // This specific corner is meant for the case where
     // someone is using `*` as a selector, but all versions
     // are pre-releases, which don't match ranges at all.
@@ -78,7 +82,6 @@ function pickManifest (packument, wanted, opts) {
 
   const manifest = (
     target &&
-    (!time || versions.indexOf(target) !== -1) &&
     packument.versions[target]
   )
   if (!manifest) {

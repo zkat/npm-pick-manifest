@@ -43,11 +43,11 @@ function pickManifest (packument, wanted, opts) {
 
   let target
 
-  if (type === 'tag') {
+  if (type === 'tag' && enjoyableBy(distTags[wanted])) {
     target = distTags[wanted]
   } else if (type === 'version') {
     target = wanted
-  } else if (type !== 'range') {
+  } else if (type !== 'range' && enjoyableBy(distTags[wanted])) {
     throw new Error('Only tag, version, and range are supported')
   }
 
@@ -78,6 +78,19 @@ function pickManifest (packument, wanted, opts) {
     // someone is using `*` as a selector, but all versions
     // are pre-releases, which don't match ranges at all.
     target = tagVersion
+  }
+
+  if (
+    !target &&
+    time &&
+    type === 'tag' &&
+    distTags[wanted] &&
+    !enjoyableBy(distTags[wanted])
+  ) {
+    const stillFresh = versions.filter(v =>
+      enjoyableBy(v) && semver.lte(v, distTags[wanted], true)
+    ).sort(semver.rcompare)
+    target = stillFresh[0]
   }
 
   const manifest = (

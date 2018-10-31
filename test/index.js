@@ -296,7 +296,7 @@ test('accepts opts.enjoyBy option to do date-based cutoffs', t => {
   manifest = pickManifest(metadata, 'latest', {
     enjoyBy: '2018-01-02'
   })
-  t.equal(manifest.version, '3.0.0', 'tag specs use tagVersion if nothing else works')
+  t.equal(manifest.version, '2.0.0', 'tag specs pick highest before dist-tag but within the range in question')
 
   manifest = pickManifest(metadata, '3.0.0', {
     enjoyBy: '2018-01-02'

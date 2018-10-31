@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="2.2.2"></a>
+## [2.2.2](https://github.com/zkat/npm-pick-manifest/compare/v2.2.1...v2.2.2) (2018-10-31)
+
+
+### Bug Fixes
+
+* **enjoyBy:** rework semantics for enjoyBy ([5684f45](https://github.com/zkat/npm-pick-manifest/commit/5684f45))
+
+
+
 <a name="2.2.1"></a>
 ## [2.2.1](https://github.com/zkat/npm-pick-manifest/compare/v2.2.0...v2.2.1) (2018-10-30)
 

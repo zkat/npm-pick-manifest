@@ -109,7 +109,8 @@ function pickManifest (packument, wanted, opts) {
       `Valid install targets:\n  ${
         Object.keys(distTags).concat(
           !opts.includeDeprecated ? undeprecated : versions
-        ).join(', ')`
+        ).join(', ')
+      }`
     )
     err.code = 'ETARGET'
     err.name = packument.name

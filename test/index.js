@@ -289,3 +289,52 @@ test('accepts opts.includeDeprecated option to disable skipping', t => {
   t.equal(manifest.version, '1.1.0', 'picked the right manifest')
   t.done()
 })
+
+test('accepts opts.enjoyBy option to do date-based cutoffs', t => {
+  const metadata = {
+    'dist-tags': {
+      latest: '3.0.0'
+    },
+    time: {
+      modified: '2018-01-03T00:00:00.000Z',
+      created: '2018-01-01T00:00:00.000Z',
+      '1.0.0': '2018-01-01T00:00:00.000Z',
+      '2.0.0': '2018-01-02T00:00:00.000Z',
+      '2.0.1': '2018-01-03T00:00:00.000Z',
+      '3.0.0': '2018-01-04T00:00:00.000Z'
+    },
+    versions: {
+      '1.0.0': { version: '1.0.0' },
+      '2.0.0': { version: '2.0.0' },
+      '2.0.1': { version: '2.0.1' },
+      '3.0.0': { version: '3.0.0' }
+    }
+  }
+
+  let manifest = pickManifest(metadata, '*', {
+    enjoyBy: '2018-01-02'
+  })
+  t.equal(manifest.version, '2.0.0', 'filtered out 3.0.0 because of dates')
+
+  manifest = pickManifest(metadata, 'latest', {
+    enjoyBy: '2018-01-02'
+  })
+  t.equal(manifest.version, '2.0.0', 'tag specs pick highest before dist-tag but within the range in question')
+
+  manifest = pickManifest(metadata, '3.0.0', {
+    enjoyBy: '2018-01-02'
+  })
+  t.equal(manifest.version, '3.0.0', 'requesting specific version overrides')
+
+  manifest = pickManifest(metadata, '^2', {
+    enjoyBy: '2018-01-02'
+  })
+  t.equal(manifest.version, '2.0.0', 'non-tag ranges filtered')
+
+  t.throws(() => {
+    pickManifest(metadata, '^3', {
+      enjoyBy: '2018-01-02'
+    })
+  }, /Enjoy By/, 'range for out-of-range spec fails even if defaultTag avail')
+  t.done()
+})

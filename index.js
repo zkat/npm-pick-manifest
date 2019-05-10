@@ -105,6 +105,11 @@ function pickManifest (packument, wanted, opts) {
             new Date(opts.enjoyBy).toLocaleString()
           }. Maybe try a different date?`
           : ''
+      }\n` +
+      `Valid install targets:\n  ${
+        Object.keys(distTags).concat(
+          !opts.includeDeprecated ? undeprecated : versions
+        ).join(', ')
       }`
     )
     err.code = 'ETARGET'

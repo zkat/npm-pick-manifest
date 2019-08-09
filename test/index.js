@@ -128,6 +128,25 @@ test('ETARGET if range does not match anything', t => {
   t.done()
 })
 
+test('E403 if version is forbidden', t => {
+  const metadata = {
+    policyRestrictions: {
+      versions: {
+        '2.1.0': { version: '2.1.0' }
+      }
+    },
+    versions: {
+      '1.0.0': { version: '1.0.0' },
+      '2.0.0': { version: '2.0.0' },
+      '2.0.5': { version: '2.0.5' }
+    }
+  }
+  t.throws(() => {
+    pickManifest(metadata, '2.1.0')
+  }, {code: 'E403'}, 'got correct error on match failure')
+  t.done()
+})
+
 test('if `defaultTag` matches a given range, use it', t => {
   const metadata = {
     'dist-tags': {
@@ -188,6 +207,16 @@ test('* ranges use `defaultTag` if no versions match', t => {
 test('errors if metadata has no versions', t => {
   t.throws(() => {
     pickManifest({versions: {}}, '^1.0.0')
+  }, {code: 'ENOVERSIONS'})
+  t.throws(() => {
+    pickManifest({}, '^1.0.0')
+  }, {code: 'ENOVERSIONS'})
+  t.done()
+})
+
+test('errors if metadata has no versions or restricted versions', t => {
+  t.throws(() => {
+    pickManifest({versions: {}, policyRestrictions: { versions: {} }}, '^1.0.0')
   }, {code: 'ENOVERSIONS'})
   t.throws(() => {
     pickManifest({}, '^1.0.0')

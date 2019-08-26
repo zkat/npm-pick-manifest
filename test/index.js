@@ -147,6 +147,46 @@ test('E403 if version is forbidden', t => {
   t.done()
 })
 
+test('E403 if version is forbidden, provided a minor version', t => {
+  const metadata = {
+    policyRestrictions: {
+      versions: {
+        '2.1.0': { version: '2.1.0' },
+        '2.1.5': { version: '2.1.5' }
+      }
+    },
+    versions: {
+      '1.0.0': { version: '1.0.0' },
+      '2.0.0': { version: '2.0.0' },
+      '2.0.5': { version: '2.0.5' }
+    }
+  }
+  t.throws(() => {
+    pickManifest(metadata, '2.1')
+  }, {code: 'E403'}, 'got correct error on match failure')
+  t.done()
+})
+
+test('E403 if version is forbidden, provided a major version', t => {
+  const metadata = {
+    policyRestrictions: {
+      versions: {
+        '1.0.0': { version: '1.0.0' },
+        '2.1.0': { version: '2.1.0' },
+        '2.1.5': { version: '2.1.5' }
+      }
+    },
+    versions: {
+      '2.0.0': { version: '2.0.0' },
+      '2.0.5': { version: '2.0.5' }
+    }
+  }
+  t.throws(() => {
+    pickManifest(metadata, '1')
+  }, {code: 'E403'}, 'got correct error on match failure')
+  t.done()
+})
+
 test('if `defaultTag` matches a given range, use it', t => {
   const metadata = {
     'dist-tags': {

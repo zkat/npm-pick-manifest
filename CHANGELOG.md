@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="4.0.0"></a>
+# [4.0.0](https://github.com/npm/npm-pick-manifest/compare/v3.0.2...v4.0.0) (2019-11-11)
+
+
+### deps
+
+* bump npm-package-arg to v7 ([42c76d8](https://github.com/npm/npm-pick-manifest/commit/42c76d8)), closes [/github.com/npm/hosted-git-info/pull/38#issuecomment-520243803](https://github.com//github.com/npm/hosted-git-info/pull/38/issues/issuecomment-520243803)
+
+
+### BREAKING CHANGES
+
+* this drops support for ancient node versions.
+
+
+
 <a name="3.0.2"></a>
 ## [3.0.2](https://github.com/npm/npm-pick-manifest/compare/v3.0.1...v3.0.2) (2019-08-30)
 

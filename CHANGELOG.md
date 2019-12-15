@@ -1,6 +1,15 @@
-# Change Log
+# Changelog
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
+
+## [5.0.0](https://github.com/npm/npm-pick-manifest/compare/v4.0.0...v5.0.0) (2019-12-15)
+
+
+### ⚠ BREAKING CHANGES
+
+* This drops support for node < 10.
+
+* normalize settings, drop old nodes, update deps ([dc2e61c](https://github.com/npm/npm-pick-manifest/commit/dc2e61cc06bd19e079128e77397df7593741da50))
 
 <a name="4.0.0"></a>
 # [4.0.0](https://github.com/npm/npm-pick-manifest/compare/v3.0.2...v4.0.0) (2019-11-11)

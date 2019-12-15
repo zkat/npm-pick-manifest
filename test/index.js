@@ -110,7 +110,7 @@ test('skips any invalid version keys', t => {
   t.equal(manifest.version, '1.0.0', 'avoided bad key')
   t.throws(() => {
     pickManifest(metadata, '^1.0.1')
-  }, {code: 'ETARGET'}, 'no matching specs')
+  }, { code: 'ETARGET' }, 'no matching specs')
   t.done()
 })
 
@@ -124,7 +124,7 @@ test('ETARGET if range does not match anything', t => {
   }
   t.throws(() => {
     pickManifest(metadata, '^2.1.0')
-  }, {code: 'ETARGET'}, 'got correct error on match failure')
+  }, { code: 'ETARGET' }, 'got correct error on match failure')
   t.done()
 })
 
@@ -143,7 +143,7 @@ test('E403 if version is forbidden', t => {
   }
   t.throws(() => {
     pickManifest(metadata, '2.1.0')
-  }, {code: 'E403'}, 'got correct error on match failure')
+  }, { code: 'E403' }, 'got correct error on match failure')
   t.done()
 })
 
@@ -163,7 +163,7 @@ test('E403 if version is forbidden, provided a minor version', t => {
   }
   t.throws(() => {
     pickManifest(metadata, '2.1')
-  }, {code: 'E403'}, 'got correct error on match failure')
+  }, { code: 'E403' }, 'got correct error on match failure')
   t.done()
 })
 
@@ -183,7 +183,7 @@ test('E403 if version is forbidden, provided a major version', t => {
   }
   t.throws(() => {
     pickManifest(metadata, '1')
-  }, {code: 'E403'}, 'got correct error on match failure')
+  }, { code: 'E403' }, 'got correct error on match failure')
   t.done()
 })
 
@@ -201,12 +201,12 @@ test('if `defaultTag` matches a given range, use it', t => {
     }
   }
   t.equal(
-    pickManifest(metadata, '^1.0.0', {defaultTag: 'foo'}).version,
+    pickManifest(metadata, '^1.0.0', { defaultTag: 'foo' }).version,
     '1.0.1',
     'picked the version for foo'
   )
   t.equal(
-    pickManifest(metadata, '^2.0.0', {defaultTag: 'foo'}).version,
+    pickManifest(metadata, '^2.0.0', { defaultTag: 'foo' }).version,
     '2.0.0',
     'no match, no foo'
   )
@@ -232,7 +232,7 @@ test('* ranges use `defaultTag` if no versions match', t => {
     }
   }
   t.equal(
-    pickManifest(metadata, '*', {defaultTag: 'beta'}).version,
+    pickManifest(metadata, '*', { defaultTag: 'beta' }).version,
     '2.0.0-beta.0',
     'used defaultTag for all-prerelease splat.'
   )
@@ -246,21 +246,21 @@ test('* ranges use `defaultTag` if no versions match', t => {
 
 test('errors if metadata has no versions', t => {
   t.throws(() => {
-    pickManifest({versions: {}}, '^1.0.0')
-  }, {code: 'ENOVERSIONS'})
+    pickManifest({ versions: {} }, '^1.0.0')
+  }, { code: 'ENOVERSIONS' })
   t.throws(() => {
     pickManifest({}, '^1.0.0')
-  }, {code: 'ENOVERSIONS'})
+  }, { code: 'ENOVERSIONS' })
   t.done()
 })
 
 test('errors if metadata has no versions or restricted versions', t => {
   t.throws(() => {
-    pickManifest({versions: {}, policyRestrictions: { versions: {} }}, '^1.0.0')
-  }, {code: 'ENOVERSIONS'})
+    pickManifest({ versions: {}, policyRestrictions: { versions: {} } }, '^1.0.0')
+  }, { code: 'ENOVERSIONS' })
   t.throws(() => {
     pickManifest({}, '^1.0.0')
-  }, {code: 'ENOVERSIONS'})
+  }, { code: 'ENOVERSIONS' })
   t.done()
 })
 

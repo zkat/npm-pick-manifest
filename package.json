@@ -7,13 +7,12 @@
     "*.js"
   ],
   "scripts": {
+    "postrelease": "npm publish",
+    "posttest": "standard",
+    "prepublishOnly": "git push --follow-tags",
     "prerelease": "npm t",
-    "postrelease": "npm publish && git push --follow-tags",
-    "pretest": "standard",
     "release": "standard-version -s",
-    "test": "tap -J --100 --coverage test/*.js",
-    "update-coc": "weallbehave -o . && git add CODE_OF_CONDUCT.md && git commit -m 'docs(coc): updated CODE_OF_CONDUCT.md'",
-    "update-contrib": "weallcontribute -o . && git add CONTRIBUTING.md && git commit -m 'docs(contributing): updated CONTRIBUTING.md'"
+    "test": "tap"
   },
   "repository": "https://github.com/npm/npm-pick-manifest",
   "keywords": [
@@ -29,23 +28,15 @@
   "license": "ISC",
   "dependencies": {
     "figgy-pudding": "^3.5.1",
-    "npm-package-arg": "^7.0.0",
+    "npm-package-arg": "^8.0.0",
     "semver": "^7.0.0"
   },
   "devDependencies": {
-    "nyc": "^13.1.0",
-    "standard": "^10.0.3",
-    "standard-version": "^4.4.0",
-    "tap": "^12.0.1",
-    "weallbehave": "^1.2.0",
-    "weallcontribute": "^1.0.8"
+    "standard": "^14.3.1",
+    "standard-version": "^7.0.1",
+    "tap": "^14.10.2"
   },
-  "config": {
-    "nyc": {
-      "exclude": [
-        "node_modules/**",
-        "test/**"
-      ]
-    }
+  "tap": {
+    "check-coverage": true
   }
 }

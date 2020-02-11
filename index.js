@@ -1,19 +1,17 @@
 'use strict'
 
-const figgyPudding = require('figgy-pudding')
 const npa = require('npm-package-arg')
 const semver = require('semver')
 
-const PickerOpts = figgyPudding({
-  defaultTag: { default: 'latest' },
-  enjoyBy: {},
-  includeDeprecated: { default: false }
-})
-
 module.exports = pickManifest
-function pickManifest (packument, wanted, opts) {
-  opts = PickerOpts(opts)
-  const time = opts.enjoyBy && packument.time && +(new Date(opts.enjoyBy))
+function pickManifest (packument, wanted, opts = {}) {
+  const {
+    defaultTag = 'latest',
+    enjoyBy = null,
+    includeDeprecated = false
+  } = opts
+
+  const time = enjoyBy && packument.time && +(new Date(enjoyBy))
   const spec = npa.resolve(packument.name, wanted)
   const type = spec.type
   if (type === 'version' || type === 'range') {
@@ -54,7 +52,7 @@ function pickManifest (packument, wanted, opts) {
     throw new Error('Only tag, version, and range are supported')
   }
 
-  const tagVersion = distTags[opts.defaultTag]
+  const tagVersion = distTags[defaultTag]
 
   if (
     !target &&
@@ -66,7 +64,7 @@ function pickManifest (packument, wanted, opts) {
     target = tagVersion
   }
 
-  if (!target && !opts.includeDeprecated) {
+  if (!target && !includeDeprecated) {
     const undeprecated = versions.filter(v => !packument.versions[v].deprecated && enjoyableBy(v)
     )
     target = semver.maxSatisfying(undeprecated, wanted, true)
@@ -108,9 +106,9 @@ function pickManifest (packument, wanted, opts) {
     // Check if target is forbidden
     const isForbidden = target && policyRestrictions && policyRestrictions.versions[target]
     const pckg = `${packument.name}@${wanted}${
-      opts.enjoyBy
+      enjoyBy
         ? ` with an Enjoy By date of ${
-          new Date(opts.enjoyBy).toLocaleString()
+          new Date(enjoyBy).toLocaleString()
         }. Maybe try a different date?`
         : ''
     }`
@@ -128,7 +126,7 @@ function pickManifest (packument, wanted, opts) {
     err.wanted = wanted
     err.versions = versions
     err.distTags = distTags
-    err.defaultTag = opts.defaultTag
+    err.defaultTag = defaultTag
     throw err
   } else {
     return manifest

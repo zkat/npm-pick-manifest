@@ -7,8 +7,9 @@
     "*.js"
   ],
   "scripts": {
+    "lint": "standard",
     "postrelease": "npm publish",
-    "posttest": "standard",
+    "posttest": "npm run lint",
     "prepublishOnly": "git push --follow-tags",
     "prerelease": "npm t",
     "release": "standard-version -s",

@@ -7,6 +7,7 @@
     "*.js"
   ],
   "scripts": {
+    "coverage": "tap",
     "lint": "standard",
     "postrelease": "npm publish",
     "posttest": "npm run lint",

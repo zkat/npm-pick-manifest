@@ -1,4 +1,4 @@
-# npm-pick-manifest [![npm version](https://img.shields.io/npm/v/npm-pick-manifest.svg)](https://npm.im/npm-pick-manifest) [![license](https://img.shields.io/npm/l/npm-pick-manifest.svg)](https://npm.im/npm-pick-manifest) [![Travis](https://img.shields.io/travis/npm/npm-pick-manifest.svg)](https://travis-ci.org/npm/npm-pick-manifest) [![AppVeyor](https://ci.appveyor.com/api/projects/status/github/npm/npm-pick-manifest?svg=true)](https://ci.appveyor.com/project/npm/npm-pick-manifest) [![Coverage Status](https://coveralls.io/repos/github/npm/npm-pick-manifest/badge.svg?branch=latest)](https://coveralls.io/github/npm/npm-pick-manifest?branch=latest)
+# npm-pick-manifest [![npm version](https://img.shields.io/npm/v/npm-pick-manifest.svg)](https://npm.im/npm-pick-manifest) [![license](https://img.shields.io/npm/l/npm-pick-manifest.svg)](https://npm.im/npm-pick-manifest) [![Travis](https://img.shields.io/travis/npm/npm-pick-manifest.svg)](https://travis-ci.org/npm/npm-pick-manifest) [![Coverage Status](https://coveralls.io/repos/github/npm/npm-pick-manifest/badge.svg?branch=latest)](https://coveralls.io/github/npm/npm-pick-manifest?branch=latest)
 
 [`npm-pick-manifest`](https://github.com/npm/npm-pick-manifest) is a standalone
 implementation of [npm](https://npmjs.com)'s semver range resolution algorithm.
@@ -11,7 +11,6 @@ implementation of [npm](https://npmjs.com)'s semver range resolution algorithm.
 
 * [Example](#example)
 * [Features](#features)
-* [Contributing](#contributing)
 * [API](#api)
   * [`pickManifest()`](#pick-manifest)
 
@@ -31,15 +30,6 @@ fetch('https://registry.npmjs.org/npm-pick-manifest').then(res => {
 
 * Uses npm's exact semver resolution algorithm
 * Supports ranges, tags, and versions
-
-### Contributing
-
-The npm-pick-manifest team enthusiastically welcomes contributions and
-project participation!  There's a bunch of things you can do if you want to
-contribute! The [Contributor Guide](CONTRIBUTING.md) has all the
-information you need for everything from reporting bugs to contributing
-entire new features. Please don't hesitate to jump in if you'd like to, or
-even ask us questions if something isn't clear.
 
 ### API
 

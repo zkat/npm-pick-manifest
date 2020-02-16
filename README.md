@@ -34,11 +34,12 @@ fetch('https://registry.npmjs.org/npm-pick-manifest').then(res => {
 
 ### Contributing
 
-The npm-pick-manifest team enthusiastically welcomes contributions and project participation!
-There's a bunch of things you can do if you want to contribute! The [Contributor
-Guide](CONTRIBUTING.md) has all the information you need for everything from
-reporting bugs to contributing entire new features. Please don't hesitate to
-jump in if you'd like to, or even ask us questions if something isn't clear.
+The npm-pick-manifest team enthusiastically welcomes contributions and
+project participation!  There's a bunch of things you can do if you want to
+contribute! The [Contributor Guide](CONTRIBUTING.md) has all the
+information you need for everything from reporting bugs to contributing
+entire new features. Please don't hesitate to jump in if you'd like to, or
+even ask us questions if something isn't clear.
 
 ### API
 
@@ -70,15 +71,17 @@ The algorithm will follow npm's algorithm for semver resolution, and only `tag`,
 
 The function will throw `ETARGET` if there was no matching manifest, and
 `ENOVERSIONS` if the packument object has no valid versions in `versions`.
+If the only matching manifest is included in a `policyRestrictions` section
+of the packument, then an `E403` is raised.
 
 If `opts.defaultTag` is provided, it will be used instead of `latest`. That is,
 if that tag matches the selector, it will be used, even if a higher available
 version matches the range.
 
-If `opts.enjoyBy` is provided, it should be something that can be passed to `new
-Date(x)`, such as a `Date` object or a timestamp string. It will be used to
-filter the selected versions such that only versions less than or equal to
-`enjoyBy` are considered.
+If `opts.before` is provided, it should be something that can be passed to
+`new Date(x)`, such as a `Date` object or a timestamp string. It will be
+used to filter the selected versions such that only versions less than or
+equal to `before` are considered.
 
 If `opts.includeDeprecated` passed in as true, deprecated versions will be
 selected. By default, deprecated versions other than `defaultTag` are ignored.

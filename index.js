@@ -7,11 +7,11 @@ module.exports = pickManifest
 function pickManifest (packument, wanted, opts = {}) {
   const {
     defaultTag = 'latest',
-    enjoyBy = null,
+    before = null,
     includeDeprecated = false
   } = opts
 
-  const time = enjoyBy && packument.time && +(new Date(enjoyBy))
+  const time = before && packument.time && +(new Date(before))
   const spec = npa.resolve(packument.name, wanted)
   const type = spec.type
   if (type === 'version' || type === 'range') {
@@ -106,9 +106,9 @@ function pickManifest (packument, wanted, opts = {}) {
     // Check if target is forbidden
     const isForbidden = target && policyRestrictions && policyRestrictions.versions[target]
     const pckg = `${packument.name}@${wanted}${
-      enjoyBy
+      before
         ? ` with an Enjoy By date of ${
-          new Date(enjoyBy).toLocaleString()
+          new Date(before).toLocaleString()
         }. Maybe try a different date?`
         : ''
     }`

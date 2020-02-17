@@ -14,7 +14,7 @@ const engineOk = (manifest, npmVersion, nodeVersion) => {
 }
 
 const isBefore = (verTimes, ver, time) =>
-  !verTimes || Date.parse(verTimes[ver]) <= time
+  !verTimes || !verTimes[ver] || Date.parse(verTimes[ver]) <= time
 
 const pickManifest = (packument, wanted, opts) => {
   const {
@@ -32,7 +32,7 @@ const pickManifest = (packument, wanted, opts) => {
   const restricted = (packument.policyRestrictions &&
     packument.policyRestrictions.versions) || {}
 
-  const time = before && verTimes ? Date.parse(before) : Infinity
+  const time = before && verTimes ? +(new Date(before)) : Infinity
   const spec = npa.resolve(name, wanted || defaultTag)
   const type = spec.type
   const distTags = packument['dist-tags'] || {}

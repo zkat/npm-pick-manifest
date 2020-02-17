@@ -365,6 +365,7 @@ test('accepts opts.before option to do date-based cutoffs', t => {
       '1.0.0': '2018-01-01T00:00:00.000Z',
       '2.0.0': '2018-01-02T00:00:00.000Z',
       '2.0.1': '2018-01-03T00:00:00.000Z',
+      '2.0.2': '2018-01-03T00:00:00.123Z',
       '3.0.0': '2018-01-04T00:00:00.000Z'
     },
     versions: {
@@ -384,6 +385,16 @@ test('accepts opts.before option to do date-based cutoffs', t => {
     before: '2018-01-02'
   })
   t.equal(manifest.version, '2.0.0', 'tag specs pick highest before dist-tag but within the range in question')
+
+  manifest = pickManifest(metadata, '*', {
+    before: Date.parse('2018-01-03T00:00:00.000Z')
+  })
+  t.equal(manifest.version, '2.0.1', 'numeric timestamp supported with ms accuracy')
+
+  manifest = pickManifest(metadata, '*', {
+    before: new Date('2018-01-03T00:00:00.000Z')
+  })
+  t.equal(manifest.version, '2.0.1', 'date obj supported with ms accuracy')
 
   t.throws(() => pickManifest(metadata, '3.0.0', {
     before: '2018-01-02'
@@ -445,12 +456,19 @@ test('support selecting staged versions if allowed by options', t => {
       versions: {
         '2.0.0': { version: '2.0.0' }
       }
+    },
+    time: {
+      '1.0.0': '2018-01-03T00:00:00.000Z'
     }
   }
 
   t.equal(pickManifest(pack, '1||2').version, '1.0.0')
   t.equal(pickManifest(pack, '1||2', { includeStaged: true }).version, '1.0.0')
   t.equal(pickManifest(pack, '2', { includeStaged: true }).version, '2.0.0')
+  t.equal(pickManifest(pack, '2', {
+    includeStaged: true,
+    before: '2018-01-01'
+  }).version, '2.0.0', 'version without time entry not subject to before filtering')
   t.throws(() => pickManifest(pack, '2'), { code: 'ETARGET' })
   t.throws(() => pickManifest(pack, 'borked'), { code: 'ETARGET' })
 

@@ -28,14 +28,17 @@ fetch('https://registry.npmjs.org/npm-pick-manifest').then(res => {
 
 ### Features
 
-* Uses npm's exact semver resolution algorithm
-* Supports ranges, tags, and versions
+* Uses npm's exact [semver resolution algorithm](http://npm.im/semver).
+* Supports ranges, tags, and versions.
+* Prefers non-deprecated versions to deprecated versions.
+* Prefers versions whose `engines` requirements are satisfied over those
+  that will raise a warning or error at install time.
 
 ### API
 
 #### <a name="pick-manifest"></a> `> pickManifest(packument, selector, [opts]) -> manifest`
 
-Returns the manifest that matches `selector`, or throws an error.
+Returns the manifest that best matches `selector`, or throws an error.
 
 Packuments are anything returned by metadata URLs from the npm registry. That
 is, they're objects with the following shape (only fields used by
@@ -56,22 +59,73 @@ is, they're objects with the following shape (only fields used by
 }
 ```
 
-The algorithm will follow npm's algorithm for semver resolution, and only `tag`,
-`range`, and `version` selectors are supported.
+The algorithm will follow npm's algorithm for semver resolution, and only
+`tag`, `range`, and `version` selectors are supported.
 
 The function will throw `ETARGET` if there was no matching manifest, and
 `ENOVERSIONS` if the packument object has no valid versions in `versions`.
 If the only matching manifest is included in a `policyRestrictions` section
 of the packument, then an `E403` is raised.
 
-If `opts.defaultTag` is provided, it will be used instead of `latest`. That is,
-if that tag matches the selector, it will be used, even if a higher available
-version matches the range.
+#### <a name="pick-manifest-options"></a> Options
 
-If `opts.before` is provided, it should be something that can be passed to
-`new Date(x)`, such as a `Date` object or a timestamp string. It will be
-used to filter the selected versions such that only versions less than or
-equal to `before` are considered.
+All options are optional.
 
-If `opts.includeDeprecated` passed in as true, deprecated versions will be
-selected. By default, deprecated versions other than `defaultTag` are ignored.
+* `includeStaged` - Boolean, default `false`.  Include manifests in the
+  `stagedVersions.versions` set, to support installing [staged
+  packages](https://github.com/npm/rfcs/pull/92) when appropriate.  Note
+  that staged packages are always treated as lower priority than actual
+  publishes, even when `includeStaged` is set.
+* `defaultTag` - String, default `'latest'`.  The default `dist-tag` to
+  install when no specifier is provided.  Note that the version indicated
+  by this specifier will be given top priority if it matches a supplied
+  semver range.
+* `before` - String, Date, or Number, default `null`. This is passed to
+  `new Date()`, so anything that works there will be valid.  Do not
+  consider _any_ manifests that were published after the date indicated.
+  Note that this is only relevant when the packument includes a `time`
+  field listing the publish date of all the packages.
+* `nodeVersion` - String, default `process.version`.  The Node.js version
+  to use when checking manifests for `engines` requirement satisfaction.
+* `npmVersion` - String, default `null`.  The npm version to use when
+  checking manifest for `engines` requirement satisfaction.  (If `null`,
+  then this particular check is skipped.)
+
+### Algorithm
+
+1. Create list of all versions in `versions`,
+   `policyRestrictions.versions`, and (if `includeStaged` is set)
+   `stagedVersions.versions`.
+2. If a `dist-tag` is requested,
+    1. If the manifest is not after the specified `before` date, then
+       select that from the set.
+    2. If the manifest is after the specified `before` date, then re-start
+       the selection looking for the highest SemVer range that is equal to
+       or less than the `dist-tag` target.
+3. If a specific version is requested,
+    1. If the manifest is not after the specified `before` date, then
+       select the specified manifest.
+    2. If the manifest is after the specified `before` date, then raise
+       `ETARGET` error.  (NB: this is a breaking change from v5, where a
+       specified version would override the `before` setting.)
+4. (At this point we know a range is requested.)
+5. If the `defaultTag` refers to a `dist-tag` that satisfies the range (or
+   if the range is `'*'` or `''`), and the manifest is published before the
+   `before` setting, then select that manifest.
+6. If nothing is yet selected, sort by the following heuristics in order,
+   and select the top item:
+    1. Prioritize versions that are not in `policyRestrictions` over those
+       that are.
+    2. Prioritize published versions over staged versions.
+    3. Prioritize versions that are not deprecated, and which have a
+       satisfied engines requirement, over those that are either deprecated
+       or have an engines mismatch.
+    4. Prioritize versions that have a satisfied engines requirement over
+       those that do not.
+    5. Prioritize versions that are not are not deprecated (but have a
+       mismatched engines requirement) over those that are deprecated.
+    6. Prioritize higher SemVer precedence over lower SemVer precedence.
+7. If no manifest was selected, raise an `ETARGET` error.
+8. If the selected item is in the `policyRestrictions.versions` list, raise
+   an `E403` error.
+9. Return the selected manifest.

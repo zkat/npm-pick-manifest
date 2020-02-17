@@ -67,7 +67,7 @@ const pickManifest = (packument, wanted, opts) => {
 
   // if the range is *, then we prefer the 'latest' if available
   const defaultVer = distTags[defaultTag]
-  if (defaultVer && (range === '*' || semver.satisfies(defaultVer, range))) {
+  if (defaultVer && (range === '*' || semver.satisfies(defaultVer, range, { loose: true }))) {
     const mani = versions[defaultVer]
     if (mani && isBefore(verTimes, defaultVer, time)) {
       return mani
@@ -115,7 +115,7 @@ const pickManifest = (packument, wanted, opts) => {
         ((notdeprb && engineb) - (notdepra && enginea)) ||
         (engineb - enginea) ||
         (notdeprb - notdepra) ||
-        semver.rcompare(vera, verb)
+        semver.rcompare(vera, verb, { loose: true })
     })
 
   return entries[0] && entries[0][1]

@@ -110,7 +110,7 @@ test('skips any invalid version keys', t => {
   t.equal(manifest.version, '1.0.0', 'avoided bad key')
   t.throws(() => {
     pickManifest(metadata, '^1.0.1')
-  }, {code: 'ETARGET'}, 'no matching specs')
+  }, { code: 'ETARGET' }, 'no matching specs')
   t.done()
 })
 
@@ -124,7 +124,76 @@ test('ETARGET if range does not match anything', t => {
   }
   t.throws(() => {
     pickManifest(metadata, '^2.1.0')
-  }, {code: 'ETARGET'}, 'got correct error on match failure')
+  }, { code: 'ETARGET' }, 'got correct error on match failure')
+  t.done()
+})
+
+test('E403 if version is forbidden', t => {
+  const metadata = {
+    policyRestrictions: {
+      versions: {
+        '2.1.0': { version: '2.1.0' }
+      }
+    },
+    versions: {
+      '1.0.0': { version: '1.0.0' },
+      '2.0.0': { version: '2.0.0' },
+      '2.0.5': { version: '2.0.5' }
+    }
+  }
+  t.throws(() => {
+    pickManifest(metadata, '2.1.0')
+  }, { code: 'E403' }, 'got correct error on match failure')
+  t.done()
+})
+
+test('E403 if version is forbidden, provided a minor version', t => {
+  const metadata = {
+    policyRestrictions: {
+      versions: {
+        '2.1.0': { version: '2.1.0' },
+        '2.1.5': { version: '2.1.5' }
+      }
+    },
+    versions: {
+      '1.0.0': { version: '1.0.0' },
+      '2.0.0': { version: '2.0.0' },
+      '2.0.5': { version: '2.0.5' }
+    }
+  }
+  t.throws(() => {
+    pickManifest(metadata, '2.1')
+  }, { code: 'E403' }, 'got correct error on match failure')
+  t.done()
+})
+
+test('E403 if version is forbidden, provided a major version', t => {
+  const metadata = {
+    'dist-tags': {
+      latest: '2.0.5',
+      // note: this SHOULD not be allowed, but it's possible that
+      // a registry proxy may implement policyRestrictions without
+      // properly modifying dist-tags when it does so.
+      borked: '2.1.5'
+    },
+    policyRestrictions: {
+      versions: {
+        '1.0.0': { version: '1.0.0' },
+        '2.1.0': { version: '2.1.0' },
+        '2.1.5': { version: '2.1.5' }
+      }
+    },
+    versions: {
+      '2.0.0': { version: '2.0.0' },
+      '2.0.5': { version: '2.0.5' }
+    }
+  }
+  t.throws(() => {
+    pickManifest(metadata, '1')
+  }, { code: 'E403' }, 'got correct error on match failure')
+  t.throws(() => {
+    pickManifest(metadata, 'borked')
+  }, { code: 'E403' }, 'got correct error on policy restricted dist-tag')
   t.done()
 })
 
@@ -142,12 +211,12 @@ test('if `defaultTag` matches a given range, use it', t => {
     }
   }
   t.equal(
-    pickManifest(metadata, '^1.0.0', {defaultTag: 'foo'}).version,
+    pickManifest(metadata, '^1.0.0', { defaultTag: 'foo' }).version,
     '1.0.1',
     'picked the version for foo'
   )
   t.equal(
-    pickManifest(metadata, '^2.0.0', {defaultTag: 'foo'}).version,
+    pickManifest(metadata, '^2.0.0', { defaultTag: 'foo' }).version,
     '2.0.0',
     'no match, no foo'
   )
@@ -173,25 +242,45 @@ test('* ranges use `defaultTag` if no versions match', t => {
     }
   }
   t.equal(
-    pickManifest(metadata, '*', {defaultTag: 'beta'}).version,
+    pickManifest(metadata, '*', { defaultTag: 'beta' }).version,
     '2.0.0-beta.0',
     'used defaultTag for all-prerelease splat.'
   )
   t.equal(
     pickManifest(metadata, '*').version,
     '1.0.0-pre.0',
-    'defaulted to `latest`'
+    'defaulted to `latest` when wanted is *'
+  )
+  t.equal(
+    pickManifest(metadata, '', { defaultTag: 'beta' }).version,
+    '2.0.0-beta.0',
+    'used defaultTag for all-prerelease ""'
+  )
+  t.equal(
+    pickManifest(metadata, '').version,
+    '1.0.0-pre.0',
+    'defaulted to `latest` when wanted is ""'
   )
   t.done()
 })
 
 test('errors if metadata has no versions', t => {
   t.throws(() => {
-    pickManifest({versions: {}}, '^1.0.0')
-  }, {code: 'ENOVERSIONS'})
+    pickManifest({ versions: {} }, '^1.0.0')
+  }, { code: 'ENOVERSIONS' })
   t.throws(() => {
     pickManifest({}, '^1.0.0')
-  }, {code: 'ENOVERSIONS'})
+  }, { code: 'ENOVERSIONS' })
+  t.done()
+})
+
+test('errors if metadata has no versions or restricted versions', t => {
+  t.throws(() => {
+    pickManifest({ versions: {}, policyRestrictions: { versions: {} } }, '^1.0.0')
+  }, { code: 'ENOVERSIONS' })
+  t.throws(() => {
+    pickManifest({}, '^1.0.0')
+  }, { code: 'ENOVERSIONS' })
   t.done()
 })
 
@@ -251,7 +340,7 @@ test('matches deprecated versions if we have to', t => {
   t.done()
 })
 
-test('accepts opts.includeDeprecated option to disable skipping', t => {
+test('will use deprecated version if no other suitable match', t => {
   const metadata = {
     versions: {
       '1.0.0': { version: '1.0.0' },
@@ -260,14 +349,12 @@ test('accepts opts.includeDeprecated option to disable skipping', t => {
       '2.0.0': { version: '2.0.0' }
     }
   }
-  const manifest = pickManifest(metadata, '^1.0.0', {
-    includeDeprecated: true
-  })
+  const manifest = pickManifest(metadata, '^1.1.0')
   t.equal(manifest.version, '1.1.0', 'picked the right manifest')
   t.done()
 })
 
-test('accepts opts.enjoyBy option to do date-based cutoffs', t => {
+test('accepts opts.before option to do date-based cutoffs', t => {
   const metadata = {
     'dist-tags': {
       latest: '3.0.0'
@@ -278,6 +365,7 @@ test('accepts opts.enjoyBy option to do date-based cutoffs', t => {
       '1.0.0': '2018-01-01T00:00:00.000Z',
       '2.0.0': '2018-01-02T00:00:00.000Z',
       '2.0.1': '2018-01-03T00:00:00.000Z',
+      '2.0.2': '2018-01-03T00:00:00.123Z',
       '3.0.0': '2018-01-04T00:00:00.000Z'
     },
     versions: {
@@ -289,29 +377,100 @@ test('accepts opts.enjoyBy option to do date-based cutoffs', t => {
   }
 
   let manifest = pickManifest(metadata, '*', {
-    enjoyBy: '2018-01-02'
+    before: '2018-01-02'
   })
   t.equal(manifest.version, '2.0.0', 'filtered out 3.0.0 because of dates')
 
   manifest = pickManifest(metadata, 'latest', {
-    enjoyBy: '2018-01-02'
+    before: '2018-01-02'
   })
   t.equal(manifest.version, '2.0.0', 'tag specs pick highest before dist-tag but within the range in question')
 
-  manifest = pickManifest(metadata, '3.0.0', {
-    enjoyBy: '2018-01-02'
+  manifest = pickManifest(metadata, '*', {
+    before: Date.parse('2018-01-03T00:00:00.000Z')
   })
-  t.equal(manifest.version, '3.0.0', 'requesting specific version overrides')
+  t.equal(manifest.version, '2.0.1', 'numeric timestamp supported with ms accuracy')
+
+  manifest = pickManifest(metadata, '*', {
+    before: new Date('2018-01-03T00:00:00.000Z')
+  })
+  t.equal(manifest.version, '2.0.1', 'date obj supported with ms accuracy')
+
+  t.throws(() => pickManifest(metadata, '3.0.0', {
+    before: '2018-01-02'
+  }), { code: 'ETARGET' }, 'version filtered out by date')
+
+  t.throws(() => pickManifest(metadata, '', {
+    before: '1918-01-02'
+  }), { code: 'ENOVERSIONS' }, 'all version filtered out by date')
 
   manifest = pickManifest(metadata, '^2', {
-    enjoyBy: '2018-01-02'
+    before: '2018-01-02'
   })
   t.equal(manifest.version, '2.0.0', 'non-tag ranges filtered')
 
   t.throws(() => {
     pickManifest(metadata, '^3', {
-      enjoyBy: '2018-01-02'
+      before: '2018-01-02'
     })
-  }, /Enjoy By/, 'range for out-of-range spec fails even if defaultTag avail')
+  }, /with a date before/, 'range for out-of-range spec fails even if defaultTag avail')
   t.done()
+})
+
+test('prefers versions that satisfy the engines requirement', t => {
+  const pack = {
+    versions: {
+      '1.0.0': { version: '1.0.0', engines: { node: '>=4' } },
+      '1.1.0': { version: '1.1.0', engines: { node: '>=6' } },
+      '1.2.0': { version: '1.2.0', engines: { node: '>=8' } },
+      '1.3.0': { version: '1.3.0', engines: { node: '>=10' } },
+      '1.4.0': { version: '1.4.0', engines: { node: '>=12' } },
+      '1.5.0': { version: '1.5.0', engines: { node: '>=14' } }
+    }
+  }
+
+  t.equal(pickManifest(pack, '1.x', { nodeVersion: '14.0.0' }).version, '1.5.0')
+  t.equal(pickManifest(pack, '1.x', { nodeVersion: '12.0.0' }).version, '1.4.0')
+  t.equal(pickManifest(pack, '1.x', { nodeVersion: '10.0.0' }).version, '1.3.0')
+  t.equal(pickManifest(pack, '1.x', { nodeVersion: '8.0.0' }).version, '1.2.0')
+  t.equal(pickManifest(pack, '1.x', { nodeVersion: '6.0.0' }).version, '1.1.0')
+  t.equal(pickManifest(pack, '1.x', { nodeVersion: '4.0.0' }).version, '1.0.0')
+  t.equal(pickManifest(pack, '1.x', { nodeVersion: '1.2.3' }).version, '1.5.0',
+    'if no engine-match exists, just use whatever')
+  t.end()
+})
+
+test('support selecting staged versions if allowed by options', t => {
+  const pack = {
+    'dist-tags': {
+      latest: '1.0.0',
+      // note: this SHOULD not be allowed, but it's possible that
+      // a registry proxy may implement stagedVersions without
+      // properly modifying dist-tags when it does so.
+      borked: '2.0.0'
+    },
+    versions: {
+      '1.0.0': { version: '1.0.0' }
+    },
+    stagedVersions: {
+      versions: {
+        '2.0.0': { version: '2.0.0' }
+      }
+    },
+    time: {
+      '1.0.0': '2018-01-03T00:00:00.000Z'
+    }
+  }
+
+  t.equal(pickManifest(pack, '1||2').version, '1.0.0')
+  t.equal(pickManifest(pack, '1||2', { includeStaged: true }).version, '1.0.0')
+  t.equal(pickManifest(pack, '2', { includeStaged: true }).version, '2.0.0')
+  t.equal(pickManifest(pack, '2', {
+    includeStaged: true,
+    before: '2018-01-01'
+  }).version, '2.0.0', 'version without time entry not subject to before filtering')
+  t.throws(() => pickManifest(pack, '2'), { code: 'ETARGET' })
+  t.throws(() => pickManifest(pack, 'borked'), { code: 'ETARGET' })
+
+  t.end()
 })

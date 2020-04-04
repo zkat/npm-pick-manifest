@@ -22,7 +22,8 @@ const pickManifest = (packument, wanted, opts) => {
     before = null,
     nodeVersion = process.version,
     npmVersion = null,
-    includeStaged = false
+    includeStaged = false,
+    avoid = null
   } = opts
 
   const { name, time: verTimes } = packument
@@ -90,11 +91,18 @@ const pickManifest = (packument, wanted, opts) => {
     })
   }
 
+  const avoidSemverOpt = { includePrerelease: true, loose: true }
+  const shouldAvoid = ver =>
+    avoid && semver.satisfies(ver, avoid, avoidSemverOpt)
+
+  const sortSemverOpt = { loose: true }
   const entries = allEntries.filter(([ver, mani]) =>
     semver.satisfies(ver, range, { loose: true }))
     .sort((a, b) => {
       const [vera, mania] = a
       const [verb, manib] = b
+      const notavoida = !shouldAvoid(vera)
+      const notavoidb = !shouldAvoid(verb)
       const notrestra = !restricted[a]
       const notrestrb = !restricted[b]
       const notstagea = !staged[a]
@@ -104,18 +112,20 @@ const pickManifest = (packument, wanted, opts) => {
       const enginea = engineOk(mania, npmVersion, nodeVersion)
       const engineb = engineOk(manib, npmVersion, nodeVersion)
       // sort by:
+      // - not an avoided version
       // - not restricted
       // - not staged
       // - not deprecated and engine ok
       // - engine ok
       // - not deprecated
       // - semver
-      return (notrestrb - notrestra) ||
+      return (notavoidb - notavoida) ||
+        (notrestrb - notrestra) ||
         (notstageb - notstagea) ||
         ((notdeprb && engineb) - (notdepra && enginea)) ||
         (engineb - enginea) ||
         (notdeprb - notdepra) ||
-        semver.rcompare(vera, verb, { loose: true })
+        semver.rcompare(vera, verb, sortSemverOpt)
     })
 
   return entries[0] && entries[0][1]

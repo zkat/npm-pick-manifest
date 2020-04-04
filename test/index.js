@@ -15,7 +15,7 @@ test('basic carat range selection', t => {
   }
   const manifest = pickManifest(metadata, '^1.0.0')
   t.equal(manifest.version, '1.0.2', 'picked the right manifest using ^')
-  t.done()
+  t.end()
 })
 
 test('basic tilde range selection', t => {
@@ -29,7 +29,7 @@ test('basic tilde range selection', t => {
   }
   const manifest = pickManifest(metadata, '~1.0.0')
   t.equal(manifest.version, '1.0.2', 'picked the right manifest using ~')
-  t.done()
+  t.end()
 })
 
 test('basic mathematical range selection', t => {
@@ -45,7 +45,7 @@ test('basic mathematical range selection', t => {
   t.equal(manifest1.version, '1.0.2', 'picked the right manifest using mathematical range')
   const manifest2 = pickManifest(metadata, '=1.0.0')
   t.equal(manifest2.version, '1.0.0', 'picked the right manifest using mathematical range')
-  t.done()
+  t.end()
 })
 
 test('basic version selection', t => {
@@ -59,7 +59,7 @@ test('basic version selection', t => {
   }
   const manifest = pickManifest(metadata, '1.0.0')
   t.equal(manifest.version, '1.0.0', 'picked the right manifest using specific version')
-  t.done()
+  t.end()
 })
 
 test('basic tag selection', t => {
@@ -76,7 +76,7 @@ test('basic tag selection', t => {
   }
   const manifest = pickManifest(metadata, 'foo')
   t.equal(manifest.version, '1.0.1', 'picked the right manifest using tag')
-  t.done()
+  t.end()
 })
 
 test('errors if a non-registry spec is provided', t => {
@@ -94,7 +94,7 @@ test('errors if a non-registry spec is provided', t => {
   t.throws(() => {
     pickManifest(metadata, 'file://foo.tar.gz')
   }, /Only tag, version, and range are supported/)
-  t.done()
+  t.end()
 })
 
 test('skips any invalid version keys', t => {
@@ -111,7 +111,7 @@ test('skips any invalid version keys', t => {
   t.throws(() => {
     pickManifest(metadata, '^1.0.1')
   }, { code: 'ETARGET' }, 'no matching specs')
-  t.done()
+  t.end()
 })
 
 test('ETARGET if range does not match anything', t => {
@@ -125,7 +125,7 @@ test('ETARGET if range does not match anything', t => {
   t.throws(() => {
     pickManifest(metadata, '^2.1.0')
   }, { code: 'ETARGET' }, 'got correct error on match failure')
-  t.done()
+  t.end()
 })
 
 test('E403 if version is forbidden', t => {
@@ -144,7 +144,7 @@ test('E403 if version is forbidden', t => {
   t.throws(() => {
     pickManifest(metadata, '2.1.0')
   }, { code: 'E403' }, 'got correct error on match failure')
-  t.done()
+  t.end()
 })
 
 test('E403 if version is forbidden, provided a minor version', t => {
@@ -164,7 +164,7 @@ test('E403 if version is forbidden, provided a minor version', t => {
   t.throws(() => {
     pickManifest(metadata, '2.1')
   }, { code: 'E403' }, 'got correct error on match failure')
-  t.done()
+  t.end()
 })
 
 test('E403 if version is forbidden, provided a major version', t => {
@@ -194,7 +194,7 @@ test('E403 if version is forbidden, provided a major version', t => {
   t.throws(() => {
     pickManifest(metadata, 'borked')
   }, { code: 'E403' }, 'got correct error on policy restricted dist-tag')
-  t.done()
+  t.end()
 })
 
 test('if `defaultTag` matches a given range, use it', t => {
@@ -225,7 +225,7 @@ test('if `defaultTag` matches a given range, use it', t => {
     '1.0.0',
     'default to `latest`'
   )
-  t.done()
+  t.end()
 })
 
 test('* ranges use `defaultTag` if no versions match', t => {
@@ -261,7 +261,7 @@ test('* ranges use `defaultTag` if no versions match', t => {
     '1.0.0-pre.0',
     'defaulted to `latest` when wanted is ""'
   )
-  t.done()
+  t.end()
 })
 
 test('errors if metadata has no versions', t => {
@@ -271,7 +271,7 @@ test('errors if metadata has no versions', t => {
   t.throws(() => {
     pickManifest({}, '^1.0.0')
   }, { code: 'ENOVERSIONS' })
-  t.done()
+  t.end()
 })
 
 test('errors if metadata has no versions or restricted versions', t => {
@@ -281,7 +281,7 @@ test('errors if metadata has no versions or restricted versions', t => {
   t.throws(() => {
     pickManifest({}, '^1.0.0')
   }, { code: 'ENOVERSIONS' })
-  t.done()
+  t.end()
 })
 
 test('matches even if requested version has spaces', t => {
@@ -295,7 +295,7 @@ test('matches even if requested version has spaces', t => {
   }
   const manifest = pickManifest(metadata, '  1.0.0 ')
   t.equal(manifest.version, '1.0.0', 'picked the right manifest even though `wanted` had spaced')
-  t.done()
+  t.end()
 })
 
 test('matches even if requested version has garbage', t => {
@@ -309,7 +309,7 @@ test('matches even if requested version has garbage', t => {
   }
   const manifest = pickManifest(metadata, '== 1.0.0 || foo')
   t.equal(manifest.version, '1.0.0', 'picked the right manifest even though `wanted` had garbage')
-  t.done()
+  t.end()
 })
 
 test('matches skip deprecated versions', t => {
@@ -323,7 +323,7 @@ test('matches skip deprecated versions', t => {
   }
   const manifest = pickManifest(metadata, '^1.0.0')
   t.equal(manifest.version, '1.0.1', 'picked the right manifest')
-  t.done()
+  t.end()
 })
 
 test('matches deprecated versions if we have to', t => {
@@ -337,7 +337,7 @@ test('matches deprecated versions if we have to', t => {
   }
   const manifest = pickManifest(metadata, '^1.1.0')
   t.equal(manifest.version, '1.1.0', 'picked the right manifest')
-  t.done()
+  t.end()
 })
 
 test('will use deprecated version if no other suitable match', t => {
@@ -351,7 +351,7 @@ test('will use deprecated version if no other suitable match', t => {
   }
   const manifest = pickManifest(metadata, '^1.1.0')
   t.equal(manifest.version, '1.1.0', 'picked the right manifest')
-  t.done()
+  t.end()
 })
 
 test('accepts opts.before option to do date-based cutoffs', t => {
@@ -414,7 +414,7 @@ test('accepts opts.before option to do date-based cutoffs', t => {
       before: '2018-01-02'
     })
   }, /with a date before/, 'range for out-of-range spec fails even if defaultTag avail')
-  t.done()
+  t.end()
 })
 
 test('prefers versions that satisfy the engines requirement', t => {
@@ -472,5 +472,26 @@ test('support selecting staged versions if allowed by options', t => {
   t.throws(() => pickManifest(pack, '2'), { code: 'ETARGET' })
   t.throws(() => pickManifest(pack, 'borked'), { code: 'ETARGET' })
 
+  t.end()
+})
+
+test('support excluding avoided version ranges', t => {
+  const metadata = {
+    versions: {
+      '1.0.0': { version: '1.0.0' },
+      '1.0.1': { version: '1.0.1' },
+      '1.0.2': { version: '1.0.2' },
+      '1.0.3': { version: '1.0.3' },
+      '2.0.0': { version: '2.0.0' }
+    }
+  }
+  const manifest = pickManifest(metadata, '^1.0.0', {
+    avoid: '>=1.0.3'
+  })
+  t.equal(manifest.version, '1.0.2', 'picked the right manifest using ^')
+  const cannotAvoid = pickManifest(metadata, '^1.0.0', {
+    avoid: '1.x'
+  })
+  t.equal(cannotAvoid.version, '1.0.3', 'could not avoid within semver range')
   t.end()
 })

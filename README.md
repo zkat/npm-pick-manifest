@@ -90,6 +90,11 @@ All options are optional.
 * `npmVersion` - String, default `null`.  The npm version to use when
   checking manifest for `engines` requirement satisfaction.  (If `null`,
   then this particular check is skipped.)
+* `avoid` - String, default `null`.  A SemVer range of
+  versions that should be avoided.  An avoided version MAY be selected if
+  there is no other option, so when using this for version selection ensure
+  that you check the result against the range to see if there was no
+  alternative available.
 
 ### Algorithm
 
@@ -114,17 +119,19 @@ All options are optional.
    `before` setting, then select that manifest.
 6. If nothing is yet selected, sort by the following heuristics in order,
    and select the top item:
-    1. Prioritize versions that are not in `policyRestrictions` over those
+    1. Prioritize versions that are not in the `avoid` range over those
        that are.
-    2. Prioritize published versions over staged versions.
-    3. Prioritize versions that are not deprecated, and which have a
+    2. Prioritize versions that are not in `policyRestrictions` over those
+       that are.
+    3. Prioritize published versions over staged versions.
+    4. Prioritize versions that are not deprecated, and which have a
        satisfied engines requirement, over those that are either deprecated
        or have an engines mismatch.
-    4. Prioritize versions that have a satisfied engines requirement over
+    5. Prioritize versions that have a satisfied engines requirement over
        those that do not.
-    5. Prioritize versions that are not are not deprecated (but have a
+    6. Prioritize versions that are not are not deprecated (but have a
        mismatched engines requirement) over those that are deprecated.
-    6. Prioritize higher SemVer precedence over lower SemVer precedence.
+    7. Prioritize higher SemVer precedence over lower SemVer precedence.
 7. If no manifest was selected, raise an `ETARGET` error.
 8. If the selected item is in the `policyRestrictions.versions` list, raise
    an `E403` error.

@@ -95,6 +95,25 @@ All options are optional.
   there is no other option, so when using this for version selection ensure
   that you check the result against the range to see if there was no
   alternative available.
+* `avoidStrict` Boolean, default `false`.  If set to true, then
+  `pickManifest` will never return a version in the `avoid` range.  If the
+  only available version in the `wanted` range is a version that should be
+  avoided, then it will return a version _outside_ the `wanted` range,
+  preferring to do so without making a SemVer-major jump, if possible.  If
+  there are no versions outside the `avoid` range, then throw an
+  `ETARGET` error.  It does this by calling pickManifest first with the
+  `wanted` range, then with a `^` affixed to the version returned by the
+  `wanted` range, and then with a `*` version range, and throwing if
+  nothing could be found to satisfy the avoidance request.
+
+Return value is the manifest as it exists in the packument, possibly
+decorated with the following boolean flags:
+
+* `_shouldAvoid` The version is in the `avoid` range.  Watch out!
+* `_outsideDependencyRange` The version is outside the `wanted` range,
+  because `avoidStrict: true` was set.
+* `_isSemVerMajor` The `_outsideDependencyRange` result is a SemVer-major
+  step up from the version returned by the `wanted` range.
 
 ### Algorithm
 

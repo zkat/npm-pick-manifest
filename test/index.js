@@ -477,6 +477,10 @@ test('support selecting staged versions if allowed by options', t => {
 
 test('support excluding avoided version ranges', t => {
   const metadata = {
+    name: 'vulny',
+    'dist-tags': {
+      latest: '1.0.3'
+    },
     versions: {
       '1.0.0': { version: '1.0.0' },
       '1.0.1': { version: '1.0.1' },
@@ -492,6 +496,63 @@ test('support excluding avoided version ranges', t => {
   const cannotAvoid = pickManifest(metadata, '^1.0.0', {
     avoid: '1.x'
   })
-  t.equal(cannotAvoid.version, '1.0.3', 'could not avoid within semver range')
+  t.match(cannotAvoid, {
+    version: '1.0.3',
+    _shouldAvoid: true
+  }, 'could not avoid within SemVer range')
+  t.end()
+})
+
+test('support excluding avoided version ranges strictly', t => {
+  const metadata = {
+    name: 'vulny',
+    'dist-tags': {
+      latest: '1.0.3'
+    },
+    versions: {
+      '1.0.0': { version: '1.0.0' },
+      '1.0.1': { version: '1.0.1' },
+      '1.0.2': { version: '1.0.2' },
+      '1.0.3': { version: '1.0.3' },
+      '2.0.0': { version: '2.0.0' }
+    }
+  }
+  const manifest = pickManifest(metadata, '^1.0.2', {
+    avoid: '1.x >1.0.2',
+    avoidStrict: true
+  })
+  t.match(manifest, {
+    version: '1.0.2'
+  }, 'picked the right manifest using ^')
+
+  const breakRange = pickManifest(metadata, '1.0.2', {
+    avoid: '1.x <1.0.3',
+    avoidStrict: true
+  })
+  t.match(breakRange, {
+    version: '1.0.3',
+    _outsideDependencyRange: true,
+    _isSemVerMajor: false
+  }, 'broke dep range, but not SemVer major')
+
+  const majorBreak = pickManifest(metadata, '1.0.2', {
+    avoid: '1.x',
+    avoidStrict: true
+  })
+  t.match(majorBreak, {
+    version: '2.0.0',
+    _outsideDependencyRange: true,
+    _isSemVerMajor: true
+  }, 'broke dep range with SemVer-major change')
+
+  t.throws(() => pickManifest(metadata, '^1.0.0', {
+    avoid: '<3.0.0',
+    avoidStrict: true
+  }), {
+    code: 'ETARGET',
+    message: 'No avoidable versions for vulny',
+    avoid: '<3.0.0'
+  })
+
   t.end()
 })

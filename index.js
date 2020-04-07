@@ -16,6 +16,15 @@ const engineOk = (manifest, npmVersion, nodeVersion) => {
 const isBefore = (verTimes, ver, time) =>
   !verTimes || !verTimes[ver] || Date.parse(verTimes[ver]) <= time
 
+const avoidSemverOpt = { includePrerelease: true, loose: true }
+const shouldAvoid = (ver, avoid) =>
+  avoid && semver.satisfies(ver, avoid, avoidSemverOpt)
+
+const decorateAvoid = (result, avoid) =>
+  result && shouldAvoid(result.version, avoid)
+    ? { ...result, _shouldAvoid: true }
+    : result
+
 const pickManifest = (packument, wanted, opts) => {
   const {
     defaultTag = 'latest',
@@ -23,11 +32,52 @@ const pickManifest = (packument, wanted, opts) => {
     nodeVersion = process.version,
     npmVersion = null,
     includeStaged = false,
-    avoid = null
+    avoid = null,
+    avoidStrict = false
   } = opts
 
   const { name, time: verTimes } = packument
   const versions = packument.versions || {}
+
+  if (avoidStrict) {
+    const looseOpts = {
+      ...opts,
+      avoidStrict: false
+    }
+
+    const result = pickManifest(packument, wanted, looseOpts)
+    if (!result || !result._shouldAvoid) {
+      return result
+    }
+
+    const caret = pickManifest(packument, `^${result.version}`, looseOpts)
+    if (!caret || !caret._shouldAvoid) {
+      return {
+        ...caret,
+        _outsideDependencyRange: true,
+        _isSemVerMajor: false
+      }
+    }
+
+    const star = pickManifest(packument, '*', looseOpts)
+    if (!star || !star._shouldAvoid) {
+      return {
+        ...star,
+        _outsideDependencyRange: true,
+        _isSemVerMajor: true
+      }
+    }
+
+    throw Object.assign(new Error(`No avoidable versions for ${name}`), {
+      code: 'ETARGET',
+      name,
+      wanted,
+      avoid,
+      before,
+      versions: Object.keys(versions)
+    })
+  }
+
   const staged = (includeStaged && packument.stagedVersions &&
     packument.stagedVersions.versions) || {}
   const restricted = (packument.policyRestrictions &&
@@ -50,7 +100,7 @@ const pickManifest = (packument, wanted, opts) => {
     // we use that.  Otherwise, we get the highest precedence version
     // prior to the dist-tag.
     if (isBefore(verTimes, ver, time)) {
-      return versions[ver] || staged[ver] || restricted[ver]
+      return decorateAvoid(versions[ver] || staged[ver] || restricted[ver], avoid)
     } else {
       return pickManifest(packument, `<=${ver}`, opts)
     }
@@ -60,15 +110,19 @@ const pickManifest = (packument, wanted, opts) => {
   if (wanted && type === 'version') {
     const ver = semver.clean(wanted, { loose: true })
     const mani = versions[ver] || staged[ver] || restricted[ver]
-    return isBefore(verTimes, ver, time) ? mani : null
+    return isBefore(verTimes, ver, time) ? decorateAvoid(mani, avoid) : null
   }
 
   // ok, sort based on our heuristics, and pick the best fit
   const range = type === 'range' ? wanted : '*'
 
   // if the range is *, then we prefer the 'latest' if available
+  // but skip this if it should be avoided, in that case we have
+  // to try a little harder.
   const defaultVer = distTags[defaultTag]
-  if (defaultVer && (range === '*' || semver.satisfies(defaultVer, range, { loose: true }))) {
+  if (defaultVer &&
+      (range === '*' || semver.satisfies(defaultVer, range, { loose: true })) &&
+      !shouldAvoid(defaultVer, avoid)) {
     const mani = versions[defaultVer]
     if (mani && isBefore(verTimes, defaultVer, time)) {
       return mani
@@ -82,18 +136,15 @@ const pickManifest = (packument, wanted, opts) => {
     .filter(([ver, mani]) => isBefore(verTimes, ver, time))
 
   if (!allEntries.length) {
-    throw Object.assign(new Error(`No valid versions available for ${name}`), {
+    throw Object.assign(new Error(`No versions available for ${name}`), {
       code: 'ENOVERSIONS',
       name,
       type,
       wanted,
+      before,
       versions: Object.keys(versions)
     })
   }
-
-  const avoidSemverOpt = { includePrerelease: true, loose: true }
-  const shouldAvoid = ver =>
-    avoid && semver.satisfies(ver, avoid, avoidSemverOpt)
 
   const sortSemverOpt = { loose: true }
   const entries = allEntries.filter(([ver, mani]) =>
@@ -101,8 +152,8 @@ const pickManifest = (packument, wanted, opts) => {
     .sort((a, b) => {
       const [vera, mania] = a
       const [verb, manib] = b
-      const notavoida = !shouldAvoid(vera)
-      const notavoidb = !shouldAvoid(verb)
+      const notavoida = !shouldAvoid(vera, avoid)
+      const notavoidb = !shouldAvoid(verb, avoid)
       const notrestra = !restricted[a]
       const notrestrb = !restricted[b]
       const notstagea = !staged[a]
@@ -128,7 +179,7 @@ const pickManifest = (packument, wanted, opts) => {
         semver.rcompare(vera, verb, sortSemverOpt)
     })
 
-  return entries[0] && entries[0][1]
+  return decorateAvoid(entries[0] && entries[0][1], avoid)
 }
 
 module.exports = (packument, wanted, opts = {}) => {

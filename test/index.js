@@ -556,3 +556,49 @@ test('support excluding avoided version ranges strictly', t => {
 
   t.end()
 })
+
+test('normalize package bins', t => {
+  const bin = './bin/foobar.js'
+
+  const name = 'foobar'
+  const metadata = {
+    name,
+    versions: {
+      '1.0.0': { bin, name, version: '1.0.0' },
+      '1.0.1': { bin, name, version: '1.0.1' },
+      '1.0.2': { bin, name, version: '1.0.2' },
+      '2.0.0': { bin, name, version: '2.0.0' }
+    }
+  }
+
+  const nameScoped = '@scope/foobar'
+  const metadataScoped = {
+    nameScoped,
+    versions: {
+      '1.0.0': { bin, name: nameScoped, version: '1.0.0' },
+      '1.0.1': { bin, name: nameScoped, version: '1.0.1' },
+      '1.0.2': { bin, name: nameScoped, version: '1.0.2' },
+      '2.0.0': { bin, name: nameScoped, version: '2.0.0' }
+    }
+  }
+
+  const manifest = pickManifest(metadata, '^1.0.0')
+  t.strictSame(manifest, {
+    name,
+    version: '1.0.2',
+    bin: {
+      foobar: 'bin/foobar.js'
+    }
+  }, 'normalized the package bin, unscoped')
+
+  const manifestScoped = pickManifest(metadataScoped, '^1.0.0')
+  t.strictSame(manifestScoped, {
+    name: nameScoped,
+    version: '1.0.2',
+    bin: {
+      foobar: 'bin/foobar.js'
+    }
+  }, 'normalized the package bin, scoped')
+
+  t.end()
+})

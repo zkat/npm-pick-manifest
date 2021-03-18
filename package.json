@@ -9,12 +9,11 @@
   "scripts": {
     "coverage": "tap",
     "lint": "standard",
-    "postrelease": "npm publish",
+    "test": "tap",
     "posttest": "npm run lint",
-    "prepublishOnly": "git push --follow-tags",
-    "prerelease": "npm t",
-    "release": "standard-version -s",
-    "test": "tap"
+    "preversion": "npm test",
+    "postversion": "npm publish",
+    "prepublishOnly": "git push origin --follow-tags"
   },
   "repository": "https://github.com/npm/npm-pick-manifest",
   "keywords": [
@@ -36,7 +35,6 @@
   },
   "devDependencies": {
     "standard": "^14.3.1",
-    "standard-version": "^7.0.1",
     "tap": "^14.11.0"
   },
   "tap": {
